@@ -1,6 +1,9 @@
 from ast import Tuple
 import cfpq_data as cd
 import networkx as nx
+from collections import namedtuple
+
+GraphInfo = namedtuple("GraphInfo", ["number_of_edges", "number_of_nodes", "labels"])
 
 
 def load_graph_by_name(name: str) -> nx.MultiDiGraph:
@@ -9,12 +12,11 @@ def load_graph_by_name(name: str) -> nx.MultiDiGraph:
     return graph
 
 
-def number_of_nodes(graph: nx.MultiDiGraph) -> int:
-    return graph.number_of_nodes()
-
-
-def number_of_edges(graph: nx.MultiDiGraph) -> int:
-    return graph.number_of_edges()
+def graph_info_by_name(name: str) -> GraphInfo:
+    graph = load_graph_by_name(name)
+    return GraphInfo(
+        graph.number_of_edges(), graph.number_of_nodes(), unique_labels(graph)
+    )
 
 
 def unique_labels(graph: nx.MultiDiGraph):
