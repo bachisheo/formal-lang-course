@@ -3,5 +3,6 @@ black
 cfpq-data
 pre-commit
 pydot
+pyparsing==3.0.1
 pytest
 scipy
