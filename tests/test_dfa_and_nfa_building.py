@@ -8,7 +8,7 @@ from project import graph_utils as gu
 
 @pytest.mark.parametrize(
     "regex_str, accepts_true, accepts_false, edge_num",
-    [("a b c|d", "abc", "abcd", 4), ("a (b | c) k |d", "ack", "abc", 6)],
+    [("a b c|d", "abc", "abcd", 4), ("a (b | c) k |d", "ack", "abc", 5)],
 )
 def test_dfa_from_regex_building(regex_str, accepts_true, accepts_false, edge_num):
     regex = bfa.Regex(regex_str)
