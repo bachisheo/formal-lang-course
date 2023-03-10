@@ -2,7 +2,7 @@ import pytest
 import networkx as nx
 
 # on import will print something from __init__ file
-from project import dfa_and_nfa_building as bfa
+from project import finite_automaton as bfa
 from project import graph_utils as gu
 
 

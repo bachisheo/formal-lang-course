@@ -1,9 +1,13 @@
 from pyformlang.regular_expression import Regex
-import pyformlang.finite_automaton as fa
+from pyformlang.finite_automaton import (
+    State,
+    DeterministicFiniteAutomaton,
+    NondeterministicFiniteAutomaton,
+)
 from networkx import MultiDiGraph
 
 
-def build_minimal_dfa_from_regex(reg: Regex) -> fa.DeterministicFiniteAutomaton:
+def build_minimal_dfa_from_regex(reg: Regex) -> DeterministicFiniteAutomaton:
     """Transforms the regular expression into an minimal DFA
 
     Parameters
@@ -20,9 +24,26 @@ def build_minimal_dfa_from_regex(reg: Regex) -> fa.DeterministicFiniteAutomaton:
     return nfa.minimize()
 
 
+def build_minimal_dfa_from_regex_str(reg_str: str) -> DeterministicFiniteAutomaton:
+    """Transforms the regular expression into an minimal DFA
+
+    Parameters
+    ----------
+    reg_str: str
+        regular expression in string
+
+    Returns
+    -------
+    dfa: DeterministicFiniteAutomaton
+        The minimal DFA equivalent to the regex
+    """
+    reg = Regex(str)
+    return build_minimal_dfa_from_regex(reg)
+
+
 def build_nfa_from_graph(
     graph: MultiDiGraph, start_states=None, final_states=None
-) -> fa.NondeterministicFiniteAutomaton:
+) -> NondeterministicFiniteAutomaton:
     """Convert a networkx graph into an finite state automaton
 
     Parameters
@@ -39,8 +60,8 @@ def build_nfa_from_graph(
     nfa : NondeterministicFiniteAutomaton
        An epsilon nondeterministic finite automaton read from the graph
     """
-    states = {x: fa.State(x) for x in graph.nodes()}
-    nfa = fa.NondeterministicFiniteAutomaton.from_networkx(graph)
+    states = {x: State(x) for x in graph.nodes()}
+    nfa = NondeterministicFiniteAutomaton.from_networkx(graph)
     if start_states == None:
         start_states = states
     if final_states == None:
