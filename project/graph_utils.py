@@ -1,12 +1,12 @@
-from ast import Tuple
 import cfpq_data as cd
-import networkx as nx
+from networkx import MultiDiGraph
+from networkx.drawing.nx_pydot import write_dot as write_graph_to_dot
 from collections import namedtuple
 
 GraphInfo = namedtuple("GraphInfo", ["number_of_edges", "number_of_nodes", "labels"])
 
 
-def load_graph_by_name(name: str) -> nx.MultiDiGraph:
+def load_graph_by_name(name: str) -> MultiDiGraph:
     path_to_graph = cd.download(name)
     graph = cd.graph_from_csv(path_to_graph)
     return graph
@@ -19,7 +19,7 @@ def graph_info_by_name(name: str) -> GraphInfo:
     )
 
 
-def unique_labels(graph: nx.MultiDiGraph):
+def unique_labels(graph: MultiDiGraph):
     labels = set()
     for edge_info in graph.edges(data="label"):
         if edge_info:
@@ -29,8 +29,8 @@ def unique_labels(graph: nx.MultiDiGraph):
 
 def generate_two_cycles_graph(
     edges_number_1: int, edges_number_2: int, labels, path_to_save: str = None
-) -> nx.MultiDiGraph:
+) -> MultiDiGraph:
     graph = cd.labeled_two_cycles_graph(edges_number_1, edges_number_2, labels=labels)
     if path_to_save:
-        nx.nx_pydot.write_dot(graph, path_to_save)
+        write_graph_to_dot(graph, path_to_save)
     return graph

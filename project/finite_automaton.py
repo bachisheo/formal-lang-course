@@ -1,6 +1,5 @@
 from pyformlang.regular_expression import Regex
 from pyformlang.finite_automaton import (
-    State,
     DeterministicFiniteAutomaton,
     NondeterministicFiniteAutomaton,
 )
@@ -37,7 +36,7 @@ def build_minimal_dfa_from_regex_str(reg_str: str) -> DeterministicFiniteAutomat
     dfa: DeterministicFiniteAutomaton
         The minimal DFA equivalent to the regex
     """
-    reg = Regex(str)
+    reg = Regex(reg_str)
     return build_minimal_dfa_from_regex(reg)
 
 
@@ -51,24 +50,23 @@ def build_nfa_from_graph(
     graph : MultiDiGraph
         The graph representation of the automaton
     start_states: iterable
-        Numbers of nodes in the graph that will be marked as the initial states of the automaton. By default, all vertices are marked.
+        Nodes in the graph that will be marked as the initial states of the automaton. By default, all vertices are marked.
     final_states: iterable
-        Numbers of nodes in the graph that will be marked as the final states of the automaton. By default, all vertices are marked.
+        Nodes in the graph that will be marked as the final states of the automaton. By default, all vertices are marked.
 
     Returns
     -------
     nfa : NondeterministicFiniteAutomaton
        An epsilon nondeterministic finite automaton read from the graph
     """
-    states = {x: State(x) for x in graph.nodes()}
     nfa = NondeterministicFiniteAutomaton.from_networkx(graph)
     if start_states == None:
-        start_states = states
+        start_states = graph.nodes()
     if final_states == None:
-        final_states = states
+        final_states = graph.nodes()
 
-    for st in start_states.values():
+    for st in start_states:
         nfa.add_start_state(st)
-    for st in final_states.values():
+    for st in final_states:
         nfa.add_final_state(st)
     return nfa
