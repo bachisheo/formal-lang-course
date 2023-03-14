@@ -1,7 +1,5 @@
 import pytest
 import networkx as nx
-
-# on import will print something from __init__ file
 from project import graph_utils as gu
 
 
