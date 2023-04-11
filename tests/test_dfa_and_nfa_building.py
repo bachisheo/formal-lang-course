@@ -1,6 +1,6 @@
 import pytest
 from networkx import MultiDiGraph
-from project import finite_automaton as bfa
+from project import fa_utils as bfa
 from project import graph_utils as gu
 
 
@@ -14,7 +14,7 @@ def test_dfa_from_regex_building(regex_str, accepts_true, accepts_false, edge_nu
     assert dfa.is_deterministic()
     assert dfa.get_number_transitions() == edge_num
     assert dfa.accepts(accepts_true)
-    assert dfa.accepts(accepts_false) == False
+    assert not dfa.accepts(accepts_false)
 
 
 @pytest.mark.parametrize(

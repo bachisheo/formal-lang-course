@@ -1,4 +1,4 @@
-from project import finite_automaton as fa
+from project import fa_utils as fa
 from pyformlang.finite_automaton import EpsilonNFA, State
 from collections import namedtuple
 from scipy import sparse
@@ -28,6 +28,7 @@ def boolean_decomposition(f_auto: EpsilonNFA) -> BooleanDecomposition:
     `idx` - list with States of graph (fixed indexes)
     `states` - dictionary with State and their index in matrix
     """
+    f_auto = f_auto.remove_epsilon_transitions()
     states = list(f_auto.states)
     idxs = dict()
     for i in range(len(states)):
