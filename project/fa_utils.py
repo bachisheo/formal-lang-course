@@ -1,3 +1,6 @@
+"""
+A module for calculations with Finite Automaton
+"""
 from pyformlang.regular_expression import Regex
 from pyformlang.finite_automaton import (
     DeterministicFiniteAutomaton,
@@ -7,12 +10,14 @@ from networkx import MultiDiGraph
 
 
 def build_minimal_dfa_from_regex(reg: Regex) -> DeterministicFiniteAutomaton:
-    """Transforms the regular expression into an minimal DFA
+    """
+    Builds a minimal deterministic finite automaton (DFA) equivalent to
+    the given regular expression `reg`.
 
     Parameters
     ----------
-    reg: Regex
-        pyformlang regular expression
+    reg: ~`pyformlang.regular_expression.Regex`
+        pyformlang regular expression object
 
     Returns
     -------
@@ -24,16 +29,18 @@ def build_minimal_dfa_from_regex(reg: Regex) -> DeterministicFiniteAutomaton:
 
 
 def build_minimal_dfa_from_regex_str(reg_str: str) -> DeterministicFiniteAutomaton:
-    """Transforms the regular expression into an minimal DFA
+    """
+    Builds a minimal deterministic finite automaton (DFA) equivalent to
+    the given regular expression (reg_str) in string.
 
     Parameters
     ----------
     reg_str: str
-        regular expression in string
+        Regular expression in string form
 
     Returns
     -------
-    dfa: DeterministicFiniteAutomaton
+    dfa: `~pyformlang.finite_automaton.DeterministicFiniteAutomaton`
         The minimal DFA equivalent to the regex
     """
     reg = Regex(reg_str)
@@ -43,26 +50,27 @@ def build_minimal_dfa_from_regex_str(reg_str: str) -> DeterministicFiniteAutomat
 def build_nfa_from_graph(
     graph: MultiDiGraph, start_states=None, final_states=None
 ) -> NondeterministicFiniteAutomaton:
-    """Convert a networkx graph into an finite state automaton
+    """
+    Builds a non-deterministic finite automaton (NFA) from a given networkx graph.
 
     Parameters
     ----------
-    graph : MultiDiGraph
+    graph : `~networkx.MultiDiGraph`
         The graph representation of the automaton
-    start_states: iterable
-        Nodes in the graph that will be marked as the initial states of the automaton. By default, all vertices are marked.
-    final_states: iterable
-        Nodes in the graph that will be marked as the final states of the automaton. By default, all vertices are marked.
+    start_states: iterable or None
+        Nodes in the graph that will be marked as the initial states of the automaton. If None, all vertices are marked.
+    final_states: iterable or None
+        Nodes in the graph that will be marked as the final states of the automaton. If None, all vertices are marked.
 
     Returns
     -------
-    nfa : NondeterministicFiniteAutomaton
-       An epsilon nondeterministic finite automaton read from the graph
+    nfa : `~pyformlang.finite_automaton.NondeterministicFiniteAutomaton~
+        An epsilon non-deterministic finite automaton read from the graph
     """
     nfa = NondeterministicFiniteAutomaton.from_networkx(graph)
-    if start_states == None:
+    if start_states is None:
         start_states = graph.nodes()
-    if final_states == None:
+    if final_states is None:
         final_states = graph.nodes()
 
     for st in start_states:

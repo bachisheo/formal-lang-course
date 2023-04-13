@@ -1,7 +1,7 @@
 import pytest
 from project import rpq_utils as rpq
 from pyformlang.finite_automaton import EpsilonNFA, State
-from project import finite_automaton as my_fa
+from project import fa_utils as my_fa
 from networkx import MultiDiGraph
 
 
