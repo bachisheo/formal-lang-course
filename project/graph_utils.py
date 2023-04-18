@@ -1,6 +1,6 @@
 import cfpq_data as cd
 from networkx import MultiDiGraph
-from networkx.drawing.nx_pydot import write_dot as write_graph_to_dot
+from networkx.drawing.nx_pydot import write_dot, read_dot
 from collections import namedtuple
 
 GraphInfo = namedtuple("GraphInfo", ["number_of_edges", "number_of_nodes", "labels"])
@@ -32,5 +32,9 @@ def generate_two_cycles_graph(
 ) -> MultiDiGraph:
     graph = cd.labeled_two_cycles_graph(edges_number_1, edges_number_2, labels=labels)
     if path_to_save:
-        write_graph_to_dot(graph, path_to_save)
+        write_dot(graph, path_to_save)
     return graph
+
+
+def load_graph_from_file(path: str) -> MultiDiGraph:
+    return read_dot(path)
