@@ -51,6 +51,7 @@ def hellings_all_pairs_rpq(graph: MultiDiGraph, cfg: CFG) -> Set[Tuple]:
 
     m = result.copy()
     while len(m) > 0:
+        tmp_result = set()
         v, Ni, u = m.pop()
         # x -> v -> u
         for x, Nj, to in result:
@@ -59,8 +60,10 @@ def hellings_all_pairs_rpq(graph: MultiDiGraph, cfg: CFG) -> Set[Tuple]:
                     Nk = p.head.value
                     NjNi = p.body
                     if (x, Nk, u) not in result and NjNi == [Nj, Ni]:
-                        m.add(x, Nk, u)
-                        result.add(x, Nk, u)
+                        m.add((x, Nk, u))
+                        tmp_result.add((x, Nk, u))
+        for r in tmp_result:
+            result.add(r)
         # v -> u -> x
         for frm, Nj, x in result:
             if u == frm:
@@ -68,8 +71,10 @@ def hellings_all_pairs_rpq(graph: MultiDiGraph, cfg: CFG) -> Set[Tuple]:
                     Nk = p.head.value
                     NiNj = p.body
                     if (v, Nk, x) not in result and NiNj == [Ni, Nj]:
-                        m.add(v, Nk, x)
-                        result.add(v, Nk, x)
+                        m.add((v, Nk, x))
+                        tmp_result.add((v, Nk, x))
+        for r in tmp_result:
+            result.add(r)
     return result
 
 
@@ -109,7 +114,7 @@ def hellings_rpq(
     return {
         (v, N, u)
         for (v, N, u) in hellings_res
-        if v in start_v and u in final_v and N == non_term
+        if v in start_v and u in final_v and (non_term is None or N == non_term)
     }
 
 
@@ -138,7 +143,7 @@ def hellings_all_pair_rpq_from_file(path_to_cfg: str, path_to_graph: str) -> Set
     return hellings_all_pairs_rpq(graph, cfg)
 
 
-def hellings_all_pair_rpq_text(cfg_text: str, graph: MultiDiGraph) -> Set[Tuple]:
+def hellings_all_pair_rpq_text(graph: MultiDiGraph, cfg_text: str) -> Set[Tuple]:
     """
     Solve the reachability problem between all pairs of vertices
     for a given graph `graph`<V, E, L> and a given CF<N, E, P, S> grammar `cfq`.
