@@ -1,5 +1,5 @@
 """
-A module for calculations with context-free grammar
+A module for converting context-free grammar to weakened Chomsky normal form
 """
 from pyformlang.cfg import CFG
 

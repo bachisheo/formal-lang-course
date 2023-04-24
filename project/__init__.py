@@ -1,1 +1,1 @@
-print("import sources directory")
+print("import project sources directory")

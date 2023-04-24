@@ -14,7 +14,7 @@ simple_cfg_text = """
     """
 
 
-def test_hellings_all_pair_prg():
+def test_all_pair_rpq():
     gr = MultiDiGraph(
         [
             (0, 1, {"label": "a"}),
@@ -33,11 +33,11 @@ def test_hellings_all_pair_prg():
         (1, Variable("N"), 3),
         (0, Variable("S"), 3),
     }
-    res = cfqp.all_pairs_rpq(cfqp.RPQMethods.Hellings, gr, cfg)
+    res = cfqp.all_pairs_rpq(cfqp.RPQMethods.Matrix, gr, cfg)
     assert expected == res
 
 
-def test_helliggs_from_text():
+def test_from_text():
     gr = MultiDiGraph(
         [
             (0, 1, {"label": "a"}),
@@ -54,11 +54,11 @@ def test_helliggs_from_text():
         (1, Variable("N"), 3),
         (0, Variable("S"), 3),
     }
-    res = cfqp.all_pair_rpq_text(cfqp.RPQMethods.Hellings, gr, simple_cfg_text)
+    res = cfqp.all_pair_rpq_text(cfqp.RPQMethods.Matrix, gr, simple_cfg_text)
     assert expected == res
 
 
-def test_helling_with_non_terms():
+def test_with_non_terms():
     gr = MultiDiGraph(
         [(0, 1, {"label": "a"}), (1, 2, {"label": "b"}), (2, 3, {"label": "c"})]
     )
@@ -71,11 +71,11 @@ def test_helling_with_non_terms():
     )
 
     expected = {(1, Variable("B"), 2)}
-    res = cfqp.rpq(cfqp.RPQMethods.Hellings, gr, cfg, Variable("B"))
+    res = cfqp.rpq(cfqp.RPQMethods.Matrix, gr, cfg, Variable("B"))
     assert expected == res
 
 
-def test_helling_with_starts():
+def test_with_starts():
     gr = MultiDiGraph(
         [(0, 1, {"label": "a"}), (1, 2, {"label": "b"}), (2, 3, {"label": "c"})]
     )
@@ -83,5 +83,5 @@ def test_helling_with_starts():
     cfg = CFG.from_text(simple_cfg_text)
 
     expected = {(1, Variable("N"), 3), (1, Variable("B"), 2)}
-    res = cfqp.rpq(cfqp.RPQMethods.Hellings, gr, cfg, None, [1])
+    res = cfqp.rpq(cfqp.RPQMethods.Matrix, gr, cfg, None, [1])
     assert expected == res

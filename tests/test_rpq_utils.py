@@ -1,8 +1,9 @@
 import pytest
-from project import rpq_utils as rpq
+import project.fa_utils as fa
 from pyformlang.finite_automaton import EpsilonNFA, State
 from project import fa_utils as my_fa
 from networkx import MultiDiGraph
+import project.tensor as rpq
 
 
 @pytest.mark.parametrize(
@@ -18,7 +19,7 @@ def test_intersection(fa1_regex, fa2_regex):
     fa1 = my_fa.build_minimal_dfa_from_regex(fa1_regex)
     fa2 = my_fa.build_minimal_dfa_from_regex(fa2_regex)
     intersect = fa1.get_intersection(fa2)
-    my_intersect = rpq.intersection(fa1, fa2)
+    my_intersect = fa.intersection(fa1, fa2)
     assert intersect.is_equivalent_to(my_intersect)
 
 
@@ -33,7 +34,7 @@ def test_intersection(fa1_regex, fa2_regex):
 def test_intersection_acception(reg1, reg2, correct_word):
     fa1 = my_fa.build_minimal_dfa_from_regex(reg1)
     fa2 = my_fa.build_minimal_dfa_from_regex(reg2)
-    my_intersect = rpq.intersection(fa1, fa2)
+    my_intersect = fa.intersection(fa1, fa2)
     assert my_intersect.accepts(correct_word)
 
 

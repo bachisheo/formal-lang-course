@@ -2,14 +2,13 @@
 A module for calculations with Recursive State Machine
 """
 
-from typing import AbstractSet, Dict
+from typing import Dict
 from project.ecfg import ECFG
 
 from pyformlang.finite_automaton import EpsilonNFA, Symbol
 from pyformlang.regular_expression import Regex
-from pyformlang.cfg import CFG, Variable
 
-from project.rpq_utils import boolean_decomposition
+from project.fa_utils import boolean_decomposition
 
 
 class RSM:

@@ -1,7 +1,7 @@
 import pytest
 import project  # on import will print something from __init__ file
 from pyformlang.cfg import CFG, Production
-from project import cfg_utils as cu
+from project import wcnf as cu
 
 
 def setup_module(module):

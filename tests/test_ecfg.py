@@ -1,6 +1,6 @@
 import pytest
 from project.ecfg import ECFG
-from project import cfg_utils as cu
+from project import wcnf as cu
 from pyformlang.cfg import CFG, Variable
 from pyformlang.regular_expression import Regex
 
