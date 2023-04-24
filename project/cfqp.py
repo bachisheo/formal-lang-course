@@ -81,8 +81,75 @@ def hellings_rpq(graph: MultiDiGraph, cfg: CFG) -> Set[Tuple]:
     return result
 
 
+def matrix_rpq(graph: MultiDiGraph, cfg: CFG) -> Set[Tuple]:
+    """
+    Solve the reachability problem between all pairs of vertices
+    for a given graph `graph`<V, E, L> and a given CF<N, E, P, S> grammar `cfq`.
+    Based on the Matrix algorithm.
+
+     Parameters
+     ----------
+     graph : `~networkx.MultiDiGraph`
+         A source database
+     cfq : ~`pyformlang.cfg import CFG`
+         Context-free grammar that defines constraints
+
+     Returns
+     -------
+     A a set of triples of the form:
+        * start vertex
+        * non_terminal of the cfg
+        * final vertex
+    """
+    wcfg = to_wcnf(cfg)
+    n = graph.number_of_nodes()
+    E = graph.edges(data="label")
+    idx_by_node = dict()
+    node_by_idx = [x for x in graph.nodes()]
+    i = 0
+    for v in node_by_idx:
+        idx_by_node[v] = i
+        i += 1
+    P = wcfg.productions
+    eps_prods = {p.head.value for p in P if not p.body}
+    term_prods = {(p.head.value, p.body[0].value) for p in P if len(p.body) == 1}
+    var_prods = {
+        (p.head.value, p.body[0].value, p.body[1].value) for p in P if len(p.body) == 2
+    }
+
+    matrices = dict()
+    x = wcfg.variables
+    matrices = {variable: array_type((n, n), dtype=bool) for variable in wcfg.variables}
+    for frm, to, x in E:
+        for var, term in term_prods:
+            if x == term:
+                matrices[var][idx_by_node[frm], idx_by_node[to]] = True
+
+    for var in eps_prods:
+        for i in range(n):
+            matrices[var][i, i] = True
+
+    is_modified = True
+    while is_modified:
+        is_modified = False
+        for res_var, frm, to in var_prods:
+            for i in range(n):
+                for j in range(n):
+                    for k in range(n):
+                        if matrices[frm][i, k] and matrices[to][k, j]:
+                            if not matrices[res_var][i, j]:
+                                matrices[res_var][i, j] = True
+                                is_modified = True
+    result = set()
+    for variable in wcfg.variables:
+        rows, cols = matrices[variable].nonzero()
+        for i in range(len(rows)):
+            result.add((node_by_idx[rows[i]], variable, node_by_idx[cols[i]]))
+    return result
+
+
 RPQMethods = Enum("Method", ["Hellings", "Matrix"])
-RPQMethodsFunc = {RPQMethods.Hellings: hellings_rpq}
+RPQMethodsFunc = {RPQMethods.Hellings: hellings_rpq, RPQMethods.Matrix: matrix_rpq}
 
 
 def all_pairs_rpq(method: RPQMethods, graph: MultiDiGraph, cfg: CFG) -> Set[Tuple]:
