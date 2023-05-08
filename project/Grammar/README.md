@@ -38,33 +38,40 @@ lambda = \ list of abstractors -> expr
 ```
 
 ## Some script examples
-```haskell
-// load the graph with name "wine"
+``` haskell
+-- load the graph with name "wine"
 let f = load graph "wine"
-// get the reachable vertices
+
+-- get the reachable vertices
 let rchbl = reachableOf f
-// load graph from file at path "g.dot"
+
+-- load graph from file at path "g.dot"
 let f2 = load graph "g.dot"
 
 let g = setStart (setFinal f to (verticesOf f)) to {0..100}
-// union of "l1" and "l2"
+
+-- union of "l1" and "l2"
 let l1 = "l1" || "l2"
-// closure of the union of languages
+
+-- closure of the union of languages
 let q1 = ("type" || l1)*
-// concatenation
+
+-- concatenation
 let q2 = "sub_class_of" ++ l1
-// union
+
+-- union
 let res1 = g && q1
 let res2 = g && q2
-// print the result (returns a string representation)
+
+-- print the result (returns a string representation)
 print res1
-// use of filter and map
+
+-- use of filter and map
 let v1 = filter (\ v -> v in s) on (map (\ (u_g,u_q1),l,(v_g,v_q1) -> u_g) on (edgesOf res1))
 let v2 = filter (\ v -> v in s) on (map (\((u_g,u_q2),l,(v_g,v_q2)) -> u_g) on (edgesOf res2))
 let v = v1 && v2
 
-let s = startOf g
-// print the list of vertices
-print s
+-- print the list of vertices
+print (startOf g)
 
 ```

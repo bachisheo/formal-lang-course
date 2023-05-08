@@ -45,7 +45,7 @@ expr:
   | expr 'in' expr                  // check membership of set
 ;
 
-COMMENT: '//'.*? ~[\n]* -> skip;
+COMMENT: '--'.*? ~[\n]* -> skip;
 WHITESPACE : [ \t\r\n\u000C] -> skip;
 INT: '0' | [1-9] DIGIT*;
 IDENT: WORD (DIGIT | WORD)*;
