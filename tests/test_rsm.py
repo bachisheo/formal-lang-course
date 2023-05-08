@@ -1,7 +1,7 @@
 import pytest
 from project.ecfg import ECFG
 from project.rsm import RSM
-from project.rpq_utils import boolean_decomposition
+from project.fa_utils import boolean_decomposition
 
 
 def test_ecfg_to_rsm():
