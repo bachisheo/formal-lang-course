@@ -73,5 +73,4 @@ let v = v1 && v2
 
 -- print the list of vertices
 print (startOf g)
-
 ```
