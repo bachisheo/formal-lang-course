@@ -9,7 +9,7 @@ statement: bind   #st_bind
           ;
 
 bind: 'let' name=var '=' value=expr;
-print: 'print' expr;
+print: 'print' exp=expr;
 
 lambda: '\\' var_list '->' expr ;
 foo: lmb=lambda | '(' lmb=lambda ')';
@@ -34,10 +34,10 @@ expr:
   | 'setFinal' v=expr 'to' g=expr                         #expr_set_final
   | 'addStart' v=expr 'to' g=expr                         #expr_add_start
   | 'addFinal' v=expr 'to' g=expr                         #expr_add_final
-  | 'startOf' l=expr                                  #expr_starts
-  | 'finalOf' l=expr                                  #expr_finals
-  | 'reachableOf' l=expr                              #expr_reach
-  | 'verticesOf' l=expr                               #expr_get_vertex
+  | 'startOf' g=expr                                  #expr_starts
+  | 'finalOf' g=expr                                  #expr_finals
+  | 'reachableOf' g=expr                              #expr_reach
+  | 'verticesOf' g=expr                               #expr_get_vertex
   | 'edgesOf' g=expr                                  #expr_get_edges
   | 'labelsOf' g=expr                                 #expr_get_labels
   | 'map' f=foo 'on' e=expr                             #expr_map

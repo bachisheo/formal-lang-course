@@ -17,6 +17,8 @@ from networkx.drawing.nx_pydot import to_pydot
 
 
 class ExceptionListener(ErrorListener):
+    """Listener raising syntax exception"""
+
     def __init__(self):
         super(ExceptionListener, self).__init__()
 
@@ -27,6 +29,8 @@ class ExceptionListener(ErrorListener):
 
 
 class SyntaxException(Exception):
+    """Exception using for syntax error"""
+
     def __init__(self, msg: str):
         self.msg = msg
 
@@ -37,7 +41,7 @@ class SyntaxException(Exception):
 def parse(source: InputStream) -> LagraphParser.ProgContext:
     """
     Checks the syntax of the program
-    code in the `Lagraph` language.
+    code in the `Lagraph` language from InputStream
     """
     lexer = LagraphLexer(source)
     lexer.removeErrorListeners()
@@ -52,6 +56,10 @@ def parse(source: InputStream) -> LagraphParser.ProgContext:
 def parse_from(
     code: str = None, *, path: str = None, encoding: str = "utf-8"
 ) -> LagraphParser.ProgContext:
+    """
+    Checks the syntax of the program
+    code in the `Lagraph` language from different sources.
+    """
     if code is not None:
         stream = InputStream(code)
 
@@ -67,6 +75,10 @@ def parse_from(
 def is_valid_syntax(
     code: str = None, *, path: str = None, encoding: str = "utf-8"
 ) -> LagraphParser.ProgContext:
+    """
+    Check that the syntax of the program
+    code is correct.
+    """
     try:
         parse_from(code=code, path=path, encoding=encoding)
 
@@ -76,7 +88,18 @@ def is_valid_syntax(
     return True
 
 
-def to_graph(cs_tree: ParserRuleContext, path: str = None) -> MultiDiGraph:
+def to_dot(cs_tree: ParserRuleContext) -> str:
+    """
+    Return AST representation in DOT string
+    """
+    graph = to_pydot(to_graph(cs_tree)).to_string()
+    return graph
+
+
+def to_graph(cs_tree: ParserRuleContext) -> MultiDiGraph:
+    """
+    Represent ANTLR CST as MultiDiGraph of AST
+    """
     visitor = GraphVisitor()
     cs_tree.accept(visitor)
     return visitor.graph
@@ -142,25 +165,155 @@ class GraphVisitor(LagraphVisitor):
         self.graph.add_node(node)
         return node
 
-    # def visitVal(self, ctx: LagraphParser.ValContext):
-    #     node = None
-    #     if ctx.intGenerator() is not None:
-    #         node = f"int gen {self.next_id()}"
-    #     elif ctx.INT() is not None:
-    #         node = f"INT {self.next_id()}: {ctx.INT()}"
-    #     elif ctx.STRING() is not None:
-    #         node = f"STRING {self.next_id()}: {ctx.STRING()}"
+    def visitPrint(self, ctx: LagraphParser.PrintContext):
+        node = Node("print", self.next_id())
+        self.graph.add_node(node)
+        expr = (ctx.exp).accept(self)
+        self.graph.add_edge(node, expr)
+        return node
 
-    #     self.graph.add_node(node)
-    #     return node
+    #
+    # set/add statements
+    #
 
-    # def visitVar_list(self, ctx: LagraphParser.Var_listContext):
-    #     node = Node(self.next_id(), label="var list")
-    #     self.graph.add_node(node)
+    def visitExpr_set_start(self, ctx: LagraphParser.Expr_set_startContext):
+        node = Node("set_start", self.next_id())
+        self.graph.add_node(node)
+        verts = (ctx.v).accept(self)
+        self.graph.add_edge(node, verts, 0)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph, 1)
+        return node
 
-    #     for i, s in enumerate(ctx.var_list):
-    #         child = s.accept(self)
+    def visitExpr_set_final(self, ctx: LagraphParser.Expr_set_finalContext):
+        node = Node("set_final", self.next_id())
+        self.graph.add_node(node)
+        verts = (ctx.v).accept(self)
+        self.graph.add_edge(node, verts, 0)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph, 1)
+        return node
 
-    #         self.graph.add_edge(Edge(node, child, label=str(i)))
+    def visitExpr_add_start(self, ctx: LagraphParser.Expr_add_startContext):
+        node = Node("add_start", self.next_id())
+        self.graph.add_node(node)
+        verts = (ctx.v).accept(self)
+        self.graph.add_edge(node, verts, 0)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph, 1)
+        return node
 
-    #     return node
+    def visitExpr_add_final(self, ctx: LagraphParser.Expr_add_finalContext):
+        node = Node("add_final", self.next_id())
+        self.graph.add_node(node)
+        verts = (ctx.v).accept(self)
+        self.graph.add_edge(node, verts, 0)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph, 1)
+        return node
+
+    #
+    # of statements
+    #
+    def visitExpr_starts(self, ctx: LagraphParser.Expr_startsContext):
+        """
+        visit node with 'startOf' expression"
+        """
+        node = Node("get_starts", self.next_id())
+        self.graph.add_node(node)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph)
+        return node
+
+    def visitExpr_finals(self, ctx: LagraphParser.Expr_finalsContext):
+        """
+        visit node with 'finalOf' expression"
+        """
+        node = Node("get_finals", self.next_id())
+        self.graph.add_node(node)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph)
+        return node
+
+    def visitExpr_reach(self, ctx: LagraphParser.Expr_reachContext):
+        """
+        visit node with 'reachableOf' expression"
+        """
+        node = Node("get_reachable", self.next_id())
+        self.graph.add_node(node)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph)
+        return node
+
+    def visitExpr_get_vertex(self, ctx: LagraphParser.Expr_get_vertexContext):
+        """
+        visit node with 'verticesOf' expression"
+        """
+        node = Node("get_vertex", self.next_id())
+        self.graph.add_node(node)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph)
+        return node
+
+    def visitExpr_get_edges(self, ctx: LagraphParser.Expr_get_edgesContext):
+        """
+        visit node with 'edgesOf' expression"
+        """
+        node = Node("get_vertex", self.next_id())
+        self.graph.add_node(node)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph)
+        return node
+
+    def visitExpr_get_labels(self, ctx: LagraphParser.Expr_get_labelsContext):
+        """
+        visit node with 'labelsOf' expression"
+        """
+        node = Node("get_labels", self.next_id())
+        self.graph.add_node(node)
+        graph = (ctx.g).accept(self)
+        self.graph.add_edge(node, graph)
+        return node
+
+    def visitExpr_map(self, ctx: LagraphParser.Expr_mapContext):
+        """
+        visit node with 'map' expression"
+        """
+        node = Node("map", self.next_id())
+        self.graph.add_node(node)
+        foo = (ctx.f).accept(self)
+        self.graph.add_edge(node, foo, 0)
+        graph = (ctx.e).accept(self)
+        self.graph.add_edge(node, graph, 1)
+        return node
+
+    def visitLambda(self, ctx: LagraphParser.LambdaContext):
+        """
+        visit node with 'lambda' expression"
+        """
+        node = Node("lambda", self.next_id())
+        self.graph.add_node(node)
+        vars = (ctx.var_list()).accept(self)
+        self.graph.add_edge(node, vars, 0)
+        expr = (ctx.expr()).accept(self)
+        self.graph.add_edge(node, expr, 1)
+        return node
+
+    def visitVar_list(self, ctx: LagraphParser.Var_listContext):
+        """
+        visit node with 'var_list'"
+        """
+        node = Node("var_list", self.next_id())
+        self.graph.add_node(node)
+
+        vars = (ctx.v1).accept(self)
+        self.graph.add_edge(node, vars, 0)
+
+        for i, s in enumerate(ctx.v):
+            child = s.accept(self)
+            self.graph.add_edge(node, child, i + 1)
+
+        return node
+
+    def visitFoo(self, ctx: LagraphParser.FooContext):
+        return (ctx.lmb).accept(self)
