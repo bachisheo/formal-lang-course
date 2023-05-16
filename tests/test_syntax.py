@@ -14,6 +14,7 @@ def not_statement():
 def test_bind():
     assert is_valid_syntax("let x = 12")
     assert is_valid_syntax('let x = "abcd"')
+    assert is_valid_syntax('let x = 3 \n let y = "abc"')
 
 
 def test_expr():

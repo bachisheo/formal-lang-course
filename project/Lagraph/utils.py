@@ -50,7 +50,7 @@ def parse(source: InputStream) -> LagraphParser.ProgContext:
 
 
 def parse_from(
-    *, code: str = None, path: str = None, encoding: str = "utf-8"
+    code: str = None, *, path: str = None, encoding: str = "utf-8"
 ) -> LagraphParser.ProgContext:
     if code is not None:
         stream = InputStream(code)
@@ -76,35 +76,83 @@ def is_valid_syntax(
     return True
 
 
-def to_dot(cs_tree: ParserRuleContext, path: str = None) -> str:
-    dot_visitor = GraphVisitor()
-    cs_tree.accept(dot_visitor)
-    return to_pydot(dot_visitor.graph)
+def to_graph(cs_tree: ParserRuleContext, path: str = None) -> MultiDiGraph:
+    visitor = GraphVisitor()
+    cs_tree.accept(visitor)
+    return visitor.graph
 
 
 class Node:
-    def __init__(self, label: str):
-        self.label = label
+    def __init__(self, name: str, id: int):
+        self.name = name
+        self.id = id
+
+    def __repr__(self) -> str:
+        return self.name
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.name + str(self.id))
 
 
 class GraphVisitor(LagraphVisitor):
     def __init__(self):
         self.graph = MultiDiGraph()
-        self.graph.name = "ast builded by ANTLR4"
         self.idx = 0
 
-    def next_id(self) -> str:
+    def next_id(self) -> int:
         self.idx += 1
-        return str(self.idx)
+        return self.idx
 
     def visitProg(self, ctx: LagraphParser.ProgContext):
-        node = Node(self.next_id() + "program")
+        node = Node("program", self.next_id())
         self.graph.add_node(node)
 
-        for i, s in enumerate(ctx.statement):
+        for i, s in enumerate(ctx.s):
             child = s.accept(self)
             self.graph.add_edge(node, child, str(i))
         return node
+
+    def visitBind(self, ctx: LagraphParser.BindContext):
+        node = Node("let", self.next_id())
+        self.graph.add_node(node)
+        var_name = (ctx.name).accept(self)
+        self.graph.add_edge(node, var_name, "name")
+        val = (ctx.value).accept(self)
+        self.graph.add_edge(node, val, "value")
+        return node
+
+    def visitInt_literal(self, ctx: LagraphParser.Int_literalContext):
+        node = Node(ctx.value.text, self.next_id())
+        self.graph.add_node(node)
+        return node
+
+    def visitVar_node(self, ctx: LagraphParser.Var_nodeContext):
+        node = Node(ctx.value.text, self.next_id())
+        self.graph.add_node(node)
+        return node
+
+    def visitString_literal(self, ctx: LagraphParser.String_literalContext):
+        node = Node(ctx.value.text, self.next_id())
+        self.graph.add_node(node)
+        return node
+
+    # def visitVal(self, ctx: LagraphParser.ValContext):
+    #     node = None
+    #     if ctx.intGenerator() is not None:
+    #         node = f"int gen {self.next_id()}"
+    #     elif ctx.INT() is not None:
+    #         node = f"INT {self.next_id()}: {ctx.INT()}"
+    #     elif ctx.STRING() is not None:
+    #         node = f"STRING {self.next_id()}: {ctx.STRING()}"
+
+    #     self.graph.add_node(node)
+    #     return node
 
     # def visitVar_list(self, ctx: LagraphParser.Var_listContext):
     #     node = Node(self.next_id(), label="var list")

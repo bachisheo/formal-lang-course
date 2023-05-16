@@ -2,47 +2,53 @@ grammar Lagraph;
 fragment WORD: [a-zA-Z_];
 fragment DIGIT: [0-9];
 
-prog: (statement)* EOF;
+prog: (s+=statement)* EOF;
 
-statement: bind | print;
+statement: bind   #st_bind
+          | print #st_print
+          ;
 
-bind: 'let' var '=' expr;
+bind: 'let' name=var '=' value=expr;
 print: 'print' expr;
 
 lambda: '\\' var_list '->' expr ;
-foo: lambda | '(' lambda ')';
-var_list: var (',' var_list)* | '(' var_list ')' (',' var_list)* ;
+foo: lmb=lambda | '(' lmb=lambda ')';
+var_list: v1=var (',' v+=var_list)* | '(' v+=var_list ')' (',' v+=var_list)* ;
 
-var: IDENT;
-val: INT | STRING | intGenerator;
+var: value=IDENT  #var_node
+  ;
+val: value=INT    #int_literal
+  | value=STRING  #string_literal
+  | value=arr     #arr_literal
+  ;
 
-intGenerator:
+arr:
 	'{' INT '}'
 	|'{' INT '..' INT '}' ;
 
 expr:
-    '(' expr ')'
-  | var                             // variables
-  | val                             // constraints
-  | 'setStart' expr 'to' expr            // set the set of start states
-  | 'setFinal' expr 'to' expr            // set the set of final states
-  | 'addStart' expr 'to' expr            // add states to the set of start states
-  | 'addFinal' expr 'to' expr            // add states to the set of final states
-  | 'startOf' expr                  // get the set of start states
-  | 'finalOf' expr                  // get the set of final states
-  | 'reachableOf' expr              // get all pairs of reachable vertices
-  | 'verticesOf' expr               // get all vertices
-  | 'edgesOf' expr                  // get all edges
-  | 'labelsOf' expr                 // get all the labels
-  | 'map' foo 'on' expr               // classic map
-  | 'filter' foo 'on' expr            // classic filter
-  | 'load' ('path' STRING | 'graph' STRING)  // loading a graph from a file | by name
-  | expr '&&' expr                  // intersection of languages
-  | expr '++' expr                  // concatentation of languages
-  | expr '||' expr                  // union of languages
-  | expr '*'                        // closure of languages (Kleene star)
-  | 'oneStep' expr                  // single transition
-  | expr 'in' expr                  // check membership of set
+    '(' e=expr ')'                                        #expr_brace
+  | e=var                                                 #expr_var
+  | e=val                                                 #expr_val
+  | 'setStart' v=expr 'to' g=expr                         #expr_set_start
+  | 'setFinal' v=expr 'to' g=expr                         #expr_set_final
+  | 'addStart' v=expr 'to' g=expr                         #expr_add_start
+  | 'addFinal' v=expr 'to' g=expr                         #expr_add_final
+  | 'startOf' l=expr                                  #expr_starts
+  | 'finalOf' l=expr                                  #expr_finals
+  | 'reachableOf' l=expr                              #expr_reach
+  | 'verticesOf' l=expr                               #expr_get_vertex
+  | 'edgesOf' g=expr                                  #expr_get_edges
+  | 'labelsOf' g=expr                                 #expr_get_labels
+  | 'map' f=foo 'on' e=expr                             #expr_map
+  | 'filter' f=foo 'on' e=expr                          #expr_filter
+  | 'load' ('path' path=STRING | 'graph' gname=STRING)         #expr_load
+  | e1=expr '&&' e2=expr                                  #expr_intersect
+  | e1=expr '++' e2=expr                                  #expr_concat
+  | e1=expr '||' e2=expr                                  #expr_union
+  | e1=expr '*'                                        #expr_star
+  | 'oneStep' e=expr                                  #expr_one_step
+  | e=expr 'in' set=expr                                  #expr_in_set
 ;
 
 COMMENT: '--'.*? ~[\n]* -> skip;

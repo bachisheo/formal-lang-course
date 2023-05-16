@@ -50,7 +50,7 @@ jobs:
 
         run: |
           cd project
-          antlr4 -Dlanguage=Python3 Grammar/Lagraph.g4 -o antlr_out -visitor
+          antlr4 -Dlanguage=Python3 Lagraph/Lagraph.g4 -o antlr_out -visitor
 
       # Run tests
       - name: Run tests
