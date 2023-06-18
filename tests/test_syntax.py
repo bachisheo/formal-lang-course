@@ -1,5 +1,5 @@
 import pytest
-from project.Lagraph.Parser import is_valid_syntax
+from project.Lagraph.parser_utils import is_valid_syntax
 
 
 def test_empty():

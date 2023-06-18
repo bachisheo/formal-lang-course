@@ -1,6 +1,7 @@
 import pytest
 from networkx import MultiDiGraph
-from project.Lagraph.Parser import parse_from, to_graph, Node
+from project.Lagraph.Parser import Node
+from project.Lagraph.parser_utils import parse_from, to_graph
 from networkx.drawing.nx_pydot import write_dot, read_dot, to_pydot
 
 
