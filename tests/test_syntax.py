@@ -1,5 +1,5 @@
 import pytest
-from project.Lagraph.utils import is_valid_syntax
+from project.Lagraph.Parser import is_valid_syntax
 
 
 def test_empty():
@@ -7,7 +7,7 @@ def test_empty():
     assert is_valid_syntax("--simple comment")
 
 
-def not_statement():
+def test_not_statement():
     assert not is_valid_syntax("\\ abc -> 12")
 
 

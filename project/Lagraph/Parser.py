@@ -176,8 +176,12 @@ class GraphVisitor(LagraphVisitor):
     # set/add statements
     #
 
-    def visitExpr_set_start(self, ctx: LagraphParser.Expr_set_startContext):
-        node = Node("set_start", self.next_id())
+    def visitExpr_set(self, ctx: LagraphParser.Expr_setContext):
+        """
+        visit node with 'setStart' and etc. expression"
+        """
+        operator = ctx.op.accept(self)
+        node = Node(operator, self.next_id())
         self.graph.add_node(node)
         verts = (ctx.v).accept(self)
         self.graph.add_edge(node, verts, 0)
@@ -185,95 +189,25 @@ class GraphVisitor(LagraphVisitor):
         self.graph.add_edge(node, graph, 1)
         return node
 
-    def visitExpr_set_final(self, ctx: LagraphParser.Expr_set_finalContext):
-        node = Node("set_final", self.next_id())
-        self.graph.add_node(node)
-        verts = (ctx.v).accept(self)
-        self.graph.add_edge(node, verts, 0)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph, 1)
-        return node
-
-    def visitExpr_add_start(self, ctx: LagraphParser.Expr_add_startContext):
-        node = Node("add_start", self.next_id())
-        self.graph.add_node(node)
-        verts = (ctx.v).accept(self)
-        self.graph.add_edge(node, verts, 0)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph, 1)
-        return node
-
-    def visitExpr_add_final(self, ctx: LagraphParser.Expr_add_finalContext):
-        node = Node("add_final", self.next_id())
-        self.graph.add_node(node)
-        verts = (ctx.v).accept(self)
-        self.graph.add_edge(node, verts, 0)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph, 1)
-        return node
+    def visitSet_operator(self, ctx: LagraphParser.Set_operatorContext) -> str:
+        return ctx.getText()
 
     #
     # of statements
     #
-    def visitExpr_starts(self, ctx: LagraphParser.Expr_startsContext):
+    def visitExpr_get(self, ctx: LagraphParser.Expr_getContext):
         """
-        visit node with 'startOf' expression"
+        visit node with 'startOf' and etc. expression"
         """
-        node = Node("get_starts", self.next_id())
+        operator = ctx.op.accept(self)
+        node = Node(operator, self.next_id())
         self.graph.add_node(node)
         graph = (ctx.g).accept(self)
         self.graph.add_edge(node, graph)
         return node
 
-    def visitExpr_finals(self, ctx: LagraphParser.Expr_finalsContext):
-        """
-        visit node with 'finalOf' expression"
-        """
-        node = Node("get_finals", self.next_id())
-        self.graph.add_node(node)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph)
-        return node
-
-    def visitExpr_reach(self, ctx: LagraphParser.Expr_reachContext):
-        """
-        visit node with 'reachableOf' expression"
-        """
-        node = Node("get_reachable", self.next_id())
-        self.graph.add_node(node)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph)
-        return node
-
-    def visitExpr_get_vertex(self, ctx: LagraphParser.Expr_get_vertexContext):
-        """
-        visit node with 'verticesOf' expression"
-        """
-        node = Node("get_vertex", self.next_id())
-        self.graph.add_node(node)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph)
-        return node
-
-    def visitExpr_get_edges(self, ctx: LagraphParser.Expr_get_edgesContext):
-        """
-        visit node with 'edgesOf' expression"
-        """
-        node = Node("get_vertex", self.next_id())
-        self.graph.add_node(node)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph)
-        return node
-
-    def visitExpr_get_labels(self, ctx: LagraphParser.Expr_get_labelsContext):
-        """
-        visit node with 'labelsOf' expression"
-        """
-        node = Node("get_labels", self.next_id())
-        self.graph.add_node(node)
-        graph = (ctx.g).accept(self)
-        self.graph.add_edge(node, graph)
-        return node
+    def visitGet_operator(self, ctx: LagraphParser.Get_operatorContext):
+        return ctx.getText()
 
     def visitExpr_map(self, ctx: LagraphParser.Expr_mapContext):
         """
@@ -281,8 +215,8 @@ class GraphVisitor(LagraphVisitor):
         """
         node = Node("map", self.next_id())
         self.graph.add_node(node)
-        foo = (ctx.f).accept(self)
-        self.graph.add_edge(node, foo, 0)
+        lambd = (ctx.l).accept(self)
+        self.graph.add_edge(node, lambd, 0)
         graph = (ctx.e).accept(self)
         self.graph.add_edge(node, graph, 1)
         return node
@@ -314,6 +248,3 @@ class GraphVisitor(LagraphVisitor):
             self.graph.add_edge(node, child, i + 1)
 
         return node
-
-    def visitFoo(self, ctx: LagraphParser.FooContext):
-        return (ctx.lmb).accept(self)

@@ -1,6 +1,6 @@
 import pytest
 from networkx import MultiDiGraph
-from project.Lagraph.utils import parse_from, to_graph, Node
+from project.Lagraph.Parser import parse_from, to_graph, Node
 from networkx.drawing.nx_pydot import write_dot, read_dot, to_pydot
 
 
@@ -57,7 +57,7 @@ def test_print():
 
 def test_expr_set_stmt():
     prnt = Node("print", 2)
-    set_start = Node("set_start", 3)
+    set_start = Node("setStart", 3)
     gr = MultiDiGraph(
         [
             ("program", prnt, 0),
@@ -72,7 +72,7 @@ def test_expr_set_stmt():
 
 def test_expr_get_stmt():
     prnt = Node("print", 2)
-    get_start = Node("get_starts", 3)
+    get_start = Node("startOf", 3)
     gr = MultiDiGraph(
         [
             ("program", prnt, 0),

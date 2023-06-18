@@ -12,7 +12,6 @@ bind: 'let' name=var '=' value=expr;
 print: 'print' exp=expr;
 
 lambda: '\\' var_list '->' expr ;
-foo: lmb=lambda | '(' lmb=lambda ')';
 var_list: v1=var (',' v+=var_list)* | '(' v+=var_list ')' (',' v+=var_list)* ;
 
 var: value=IDENT  #var_node
@@ -31,11 +30,11 @@ expr:
   '(' e=expr ')'                                          #expr_brace
   | e=var                                                 #expr_var
   | e=val                                                 #expr_val
-  | set_operator v=expr 'to' g=expr                        #expr_set
-  | get_operator g=expr                                              #expr_set
-  |  e1=expr binary_operator e2=expr                                            #expr_binop
-  | op='map' f=foo 'on' e=expr                               #expr_map
-  | op='filter' f=foo 'on' e=expr                            #expr_filter
+  | op=set_operator v=expr 'to' g=expr                       #expr_set
+  | op=get_operator g=expr                                   #expr_get
+  | e1=expr op=binary_operator e2=expr                       #expr_binop
+  | op='map' '(' l=lambda ')' 'on' e=expr                               #expr_map
+  | op='filter' '(' l=lambda ')' 'on' e=expr                            #expr_filter
   | 'load' ('path' path=STRING | 'graph' gname=STRING)    #expr_load
   | e1=expr '*'                                           #expr_star
   | 'oneStep' e=expr                                      #expr_one_step
