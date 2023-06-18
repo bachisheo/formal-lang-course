@@ -19,37 +19,51 @@ var: value=IDENT  #var_node
   ;
 val: value=INT    #int_literal
   | value=STRING  #string_literal
-  | value=arr     #arr_literal
+  | value=set     #set_literal
   ;
 
-arr:
+set:
 	'{' INT '}'
-	|'{' INT '..' INT '}' ;
+	|'{' INT '..' INT '}'
+  ;
 
 expr:
-    '(' e=expr ')'                                        #expr_brace
+  '(' e=expr ')'                                          #expr_brace
   | e=var                                                 #expr_var
   | e=val                                                 #expr_val
-  | 'setStart' v=expr 'to' g=expr                         #expr_set_start
-  | 'setFinal' v=expr 'to' g=expr                         #expr_set_final
-  | 'addStart' v=expr 'to' g=expr                         #expr_add_start
-  | 'addFinal' v=expr 'to' g=expr                         #expr_add_final
-  | 'startOf' g=expr                                  #expr_starts
-  | 'finalOf' g=expr                                  #expr_finals
-  | 'reachableOf' g=expr                              #expr_reach
-  | 'verticesOf' g=expr                               #expr_get_vertex
-  | 'edgesOf' g=expr                                  #expr_get_edges
-  | 'labelsOf' g=expr                                 #expr_get_labels
-  | 'map' f=foo 'on' e=expr                             #expr_map
-  | 'filter' f=foo 'on' e=expr                          #expr_filter
-  | 'load' ('path' path=STRING | 'graph' gname=STRING)         #expr_load
-  | e1=expr '&&' e2=expr                                  #expr_intersect
-  | e1=expr '++' e2=expr                                  #expr_concat
-  | e1=expr '||' e2=expr                                  #expr_union
-  | e1=expr '*'                                        #expr_star
-  | 'oneStep' e=expr                                  #expr_one_step
-  | e=expr 'in' set=expr                                  #expr_in_set
+  | set_operator v=expr 'to' g=expr                        #expr_set
+  | get_operator g=expr                                              #expr_set
+  |  e1=expr binary_operator e2=expr                                            #expr_binop
+  | op='map' f=foo 'on' e=expr                               #expr_map
+  | op='filter' f=foo 'on' e=expr                            #expr_filter
+  | 'load' ('path' path=STRING | 'graph' gname=STRING)    #expr_load
+  | e1=expr '*'                                           #expr_star
+  | 'oneStep' e=expr                                      #expr_one_step
+  | e=expr 'in' s=expr                                  #expr_in_set
 ;
+
+set_operator:
+  'setStart'
+  | 'setFinal'
+  | 'addStart'
+  | 'addFinal'
+  ;
+
+get_operator:
+  'startOf'
+  | 'finalOf'
+  | 'reachableOf'
+  |'verticesOf'
+  | 'edgesOf'
+  | 'labelsOf'
+  ;
+
+binary_operator:
+  '&&'
+  | '++'
+  | '||'
+  ;
+
 
 COMMENT: '--'.*? ~[\n]* -> skip;
 WHITESPACE : [ \t\r\n\u000C] -> skip;

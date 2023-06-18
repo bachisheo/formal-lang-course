@@ -37,6 +37,19 @@ expr =
 lambda = \ list of abstractors -> expr
 ```
 
+Typing rules
+
+$$STRING: string$$
+$$INT: int$$
+$$SET: set$$
+$$\frac{let~x = y ~~~~~ y : T}{x : T}$$
+$$\frac{\setminus xs \to y ~~~~~ y: T}{x : Lambda<T>}$$
+
+
+
+
+
+
 ## Some script examples
 ``` haskell
 -- load the graph with name "wine"
