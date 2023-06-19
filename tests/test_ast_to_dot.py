@@ -89,16 +89,14 @@ def test_expr_map():
     prnt = Node("print", 2)
     map = Node("map", 3)
     lmb = Node("lambda", 3)
-    vars = Node("var_list", 3)
 
     gr = MultiDiGraph(
         [
             ("program", prnt, 0),
             (prnt, map),
             (map, lmb, 0),
-            (lmb, vars, 0),
-            (vars, "x", 0),
-            (lmb, "12", 1),
+            (lmb, "x", "variable"),
+            (lmb, "12", "expr"),
             (map, "eee", 1),
         ]
     )

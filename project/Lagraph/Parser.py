@@ -55,7 +55,7 @@ class GraphVisitor(LagraphVisitor):
         self.graph.add_node(node)
         return node
 
-    def visitVar_node(self, ctx: LagraphParser.Var_nodeContext):
+    def visitVar(self, ctx: LagraphParser.VarContext):
         node = Node(ctx.value.text, self.next_id())
         self.graph.add_node(node)
         return node
@@ -127,24 +127,8 @@ class GraphVisitor(LagraphVisitor):
         """
         node = Node("lambda", self.next_id())
         self.graph.add_node(node)
-        vars = (ctx.var_list()).accept(self)
-        self.graph.add_edge(node, vars, 0)
+        vars = (ctx.var()).accept(self)
+        self.graph.add_edge(node, vars, "variable")
         expr = (ctx.expr()).accept(self)
-        self.graph.add_edge(node, expr, 1)
-        return node
-
-    def visitVar_list(self, ctx: LagraphParser.Var_listContext):
-        """
-        visit node with 'var_list'"
-        """
-        node = Node("var_list", self.next_id())
-        self.graph.add_node(node)
-
-        vars = (ctx.v1).accept(self)
-        self.graph.add_edge(node, vars, 0)
-
-        for i, s in enumerate(ctx.v):
-            child = s.accept(self)
-            self.graph.add_edge(node, child, i + 1)
-
+        self.graph.add_edge(node, expr, "expr")
         return node

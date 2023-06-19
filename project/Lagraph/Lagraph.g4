@@ -11,10 +11,10 @@ statement: bind   #st_bind
 bind: 'let' name=var '=' value=expr;
 print: 'print' exp=expr;
 
-lambda: '\\' var_list '->' expr ;
+lambda: '\\' var '->' expr ;
 var_list: v1=var (',' v+=var_list)* | '(' v+=var_list ')' (',' v+=var_list)* ;
 
-var: value=IDENT  #var_node
+var: value=IDENT
   ;
 val: value=INT    #int_literal
   | value=STRING  #string_literal
