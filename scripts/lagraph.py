@@ -2,12 +2,13 @@
 Main script to run interpreter from CLI
 """
 import sys
-from project.Lagraph.Exceptions import InterpretingError
 import shared
+
 
 sys.path.insert(1, str(shared.ROOT))
 from project.Lagraph.parser_utils import interpret_file
 
+from project.Lagraph.Exceptions import InterpretingError
 
 if __name__ == "__main__":
     try:

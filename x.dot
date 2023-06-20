@@ -1,0 +1,7 @@
+digraph  {
+s2 [is_final=False, is_start=False, label=s2, peripheries=1];
+s3 [is_final=False, is_start=False, label=s3, peripheries=1];
+s1 [is_final=False, is_start=False, label=s1, peripheries=1];
+s2 -> s3  [key=0, label=b];
+s1 -> s2  [key=0, label=a];
+}
