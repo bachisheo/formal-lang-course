@@ -2,7 +2,7 @@
 Semantic module for interpretor
 """
 from project.Lagraph.Exceptions import InterpretingError
-from project.Lagraph.Types import LambdaType, RSMType, FSMType
+from project.Lagraph.Types import LambdaType, FSMType
 from pyformlang.finite_automaton import EpsilonNFA
 
 from project.fa_utils import (
@@ -74,10 +74,7 @@ def get_expression(graph, operator):
     Raises:
         InterpretingError: If the input is not of the correct types.
     """
-    nfa: EpsilonNFA = EpsilonNFA()
-    if isinstance(graph, RSMType):
-        nfa = EpsilonNFA()
-    elif isinstance(graph, FSMType):
+    if isinstance(graph, FSMType):
         nfa = graph.value
     else:
         raise InterpretingError(f"Cant apply '{operator}' operations to not graph")

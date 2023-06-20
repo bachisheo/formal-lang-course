@@ -1,5 +1,5 @@
 # Graph Query Language
-## Abstract syntax of language `Lagraph` (concrete syntax is in file `Lagraph.g4`)
+## Абстрактный синтаксис языка `Lagraph` (конкретный синтаксис определен в `Lagraph.g4`)
 ```
 prog = List<stmt>
 
@@ -10,7 +10,7 @@ stmt =
 val =
     String of string
   | Int of int
-  | RangeSet of int * int   // set of int numbers in range
+  | Set of expr
 
 expr =
     Var of var                   // variables
@@ -33,57 +33,63 @@ expr =
   | Union of expr * expr         // union of languages
   | Star of expr                 // closure of languages (Kleene star)
   | Smb of expr                  // single transition
+  | expr in expr                 // check that element in set after calculation
+  | expr == expr                 // check that two values are equals
 
-lambda = \ list of abstractors -> expr
+lambda = \ abstractor -> expr
 ```
 
-Typing rules
-
-$$STRING: string$$
-$$INT: int$$
-$$SET: set$$
-$$\frac{let~x = y ~~~~~ y : T}{x : T}$$
-$$\frac{\setminus xs \to y ~~~~~ y: T}{x : Lambda<T>}$$
 
 
+Система типов:
+В данном языка используются типы-обертки
+
+* `FSMType` для конечного автомата (pyformlang.finite_automaton.EpsilonNFA)
+* `LambdaType` для обертки над лямбда функцией
+
+Для типа списка и множества используются стандартные типы языка питон (`set` и `list`). Логических типов нет, булева операция возвращает целочисленный 0 при ложном результате и 1 при истинном
+
+Из-за особенностей библиотек, стандартно используемых для работы с `dot` форматом, при загрузке графа из внешнего источника по умолчанию все его вершины помечаются как стартовые и финальные. Файл загружается с помощью команды `loadFrom` из файла, по имени из датасета `cfpq_data` или командой `fromExpr` из регулярного выражения в виде строки (используется `PythonRegex`)
+
+Вершины, метки и грани графов являются множествами.
+
+Операции объединения, пересечения, конкатенации и замыкания клини определены для графов.
+
+При ошибках типизации бросается исключение `InterpretingError`, во время интерпретации кода из файла оно перехватывается, выдается сообщение об ошибке и работа завершается.
+
+Для множеств определены операции `map` и `filter`. Как аргумент они принимают лямбда-функцию в заданном формате.
 
 
-
-
-## Some script examples
-``` haskell
+## Примеры запросов на языке (больше в тестах `tests/interpreter`)
+``` python
 -- load the graph with name "wine"
-let f = load graph "wine"
+let w = loadFrom name "wine"
 
 -- get the reachable vertices
-let rchbl = reachableOf f
+let rchbl = reachableOf f1
 
 -- load graph from file at path "g.dot"
-let f2 = load graph "g.dot"
+let f1 = loadFrom path "g.dot"
+let f2 = loadFrom path "f.dot"
+print f1
 
-let g = setStart (setFinal f to (verticesOf f)) to {0..100}
+let g = setStart {"a", "b", "c"} to f2
 
 -- union of "l1" and "l2"
-let l1 = "l1" || "l2"
-
--- closure of the union of languages
-let q1 = ("type" || l1)*
+let u = f2 || f1
 
 -- concatenation
-let q2 = "sub_class_of" ++ l1
+let c = f1 ++ f2
 
--- union
-let res1 = g && q1
-let res2 = g && q2
+-- intersect
+let i = f1 && f2
 
--- print the result (returns a string representation)
-print res1
 
 -- use of filter and map
-let v1 = filter (\ v -> v in s) on (map (\ (u_g,u_q1),l,(v_g,v_q1) -> u_g) on (edgesOf res1))
-let v2 = filter (\ v -> v in s) on (map (\((u_g,u_q2),l,(v_g,v_q2)) -> u_g) on (edgesOf res2))
-let v = v1 && v2
+let forty = filter (\\x -> x == 42) on {1, 2, 3, 4, 42}
+let forty = map (\\x -> 42) on {1, 2, 3, 4}
 
--- print the list of vertices
-print (startOf g)
 ```
+
+## Запуск
+Скрипт для запуска интерпретатора на файле находится в файле `scripts/lagraph.py`.

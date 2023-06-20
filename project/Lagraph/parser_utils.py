@@ -8,6 +8,7 @@ from antlr4 import (
 from antlr4.error.ErrorListener import ErrorListener
 from networkx.drawing.nx_pydot import to_pydot
 from networkx import MultiDiGraph
+from project.Lagraph.Interpreter import InterpretingVisitor
 from project.Lagraph.Parser import GraphVisitor
 from project.antlr_out.Lagraph.LagraphLexer import LagraphLexer
 
@@ -37,7 +38,7 @@ class SyntaxException(Exception):
         return self.msg
 
 
-def parse(source: InputStream) -> LagraphParser.ProgContext:
+def build_tree(source: InputStream) -> LagraphParser.ProgContext:
     """
     Checks the syntax of the program
     code in the `Lagraph` language from InputStream
@@ -68,7 +69,7 @@ def parse_from(
     else:
         stream = StdinStream(encoding=encoding)
 
-    return parse(stream)
+    return build_tree(stream)
 
 
 def is_valid_syntax(
@@ -102,3 +103,15 @@ def to_graph(cs_tree: ParserRuleContext) -> MultiDiGraph:
     visitor = GraphVisitor()
     cs_tree.accept(visitor)
     return visitor.graph
+
+
+def interpret(cs_tree: ParserRuleContext) -> str:
+    visitor = InterpretingVisitor()
+    cs_tree.accept(visitor)
+    return visitor.get_log()
+
+
+def interpret_file(path: str, encoding: str = "utf-8"):
+    stream = FileStream(path, encoding=encoding)
+    tree = build_tree(stream)
+    interpret(tree)

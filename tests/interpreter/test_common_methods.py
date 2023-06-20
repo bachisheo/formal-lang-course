@@ -53,6 +53,26 @@ def test_print():
     assert output == visitor.get_log() + "\n"
 
 
+def test_print_graph():
+    x = EpsilonNFA()
+    edges_x = [
+        ("s1", "a", "s2"),
+        ("s2", "b", "s3"),
+    ]
+    x.add_transitions(edges_x)
+    x.write_as_dot("tmp/x.dot")
+    script = """
+    let g = loadFrom path "tmp/x.dot"
+    print g
+    """
+    visitor = get_visitor(script)
+    graph_view = visitor.get_log()
+    assert (
+        graph_view
+        == 'digraph  {\ns3 [is_final=True, is_start=True, label=s3, peripheries=2];\ns3_starting [height="0.0", label="", shape=None, width="0.0"];\ns1 [is_final=True, is_start=True, label=s1, peripheries=2];\ns1_starting [height="0.0", label="", shape=None, width="0.0"];\ns2 [is_final=True, is_start=True, label=s2, peripheries=2];\ns2_starting [height="0.0", label="", shape=None, width="0.0"];\ns3_starting -> s3  [key=0];\ns1 -> s2  [key=0, label=a];\ns1_starting -> s1  [key=0];\ns2 -> s3  [key=0, label=b];\ns2_starting -> s2  [key=0];\n}\n'
+    )
+
+
 def test_from_regex():
     regex_str = "(ab)* | (cdx)"
     script = f'let gr = fromRegex "{regex_str}"'

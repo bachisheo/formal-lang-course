@@ -4,6 +4,8 @@ from networkx.drawing.nx_pydot import to_pydot
 
 
 class LagraphType:
+    """Internal types fot type checking in interpreter"""
+
     def __init__(self):
         self.value = None
 
@@ -18,7 +20,7 @@ class LagraphType:
 
 @dataclass
 class FSMType(LagraphType):
-    """Finite state machine"""
+    """state machine  type class"""
 
     value: EpsilonNFA
 
@@ -29,13 +31,9 @@ class FSMType(LagraphType):
         return to_pydot(self.value.to_networkx()).to_string()
 
 
-class RSMType(LagraphType):
-    """Recursive state machine"""
-
-    pass
-
-
 class LambdaType(LagraphType):
+    """Lambda function type class"""
+
     def __init__(self, var_name, expr):
         self.var_name = var_name
         self.expr = expr

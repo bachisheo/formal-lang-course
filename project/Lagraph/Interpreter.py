@@ -6,6 +6,29 @@ from project.antlr_out.Lagraph.LagraphVisitor import LagraphVisitor
 from antlr4.Token import CommonToken
 
 
+def interpret(prog):
+    vis = InterpretingVisitor()
+    tree = prog()
+    tree.accept(vis)
+    return vis.output
+
+
+def interpret(script: str):
+    """
+    Interprets the given code string and returns the output as a string.
+    """
+    visitor = InterpretingVisitor()
+    tree = get_parse_tree(script)
+    tree.accept(vis)
+
+
+def interpret_file(file: str):
+    """
+    Interprets the code in the specified file and returns the output as a string.
+    """
+    return _interpret(lambda: get_parse_tree_from_file(file))
+
+
 class StackMemory:
     """
     Object for storing and getting program variables
