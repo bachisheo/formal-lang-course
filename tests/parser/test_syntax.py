@@ -1,4 +1,5 @@
 import pytest
+import project
 from project.Lagraph.parser_utils import is_valid_syntax
 
 

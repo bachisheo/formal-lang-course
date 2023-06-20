@@ -1,10 +1,11 @@
 """
 A module for calculations with Finite Automaton
 """
-from pyformlang.regular_expression import Regex
+from pyformlang.regular_expression import PythonRegex
 from pyformlang.finite_automaton import (
     DeterministicFiniteAutomaton,
     NondeterministicFiniteAutomaton,
+    Epsilon,
 )
 from networkx import MultiDiGraph
 from pyformlang.finite_automaton import EpsilonNFA, State
@@ -13,14 +14,24 @@ from scipy import sparse
 from scipy.sparse import csc_array as array_type
 
 
-def build_minimal_dfa_from_regex(reg: Regex) -> DeterministicFiniteAutomaton:
+def build_nfa_from_string(reg_str: str) -> EpsilonNFA:
+    """
+    Builds a  NFA equivalent to
+    the given regular expression in string `reg_str`.
+    """
+    reg = PythonRegex(reg_str)
+    nfa = reg.to_epsilon_nfa()
+    return nfa
+
+
+def build_minimal_dfa_from_regex(reg: PythonRegex) -> DeterministicFiniteAutomaton:
     """
     Builds a minimal deterministic finite automaton (DFA) equivalent to
     the given regular expression `reg`.
 
     Parameters
     ----------
-    reg: ~`pyformlang.regular_expression.Regex`
+    reg: ~`pyformlang.regular_expression.PythonRegex`
         pyformlang regular expression object
 
     Returns
@@ -47,7 +58,7 @@ def build_minimal_dfa_from_regex_str(reg_str: str) -> DeterministicFiniteAutomat
     dfa: `~pyformlang.finite_automaton.DeterministicFiniteAutomaton`
         The minimal DFA equivalent to the regex
     """
-    reg = Regex(reg_str)
+    reg = PythonRegex(reg_str)
     return build_minimal_dfa_from_regex(reg)
 
 
@@ -161,3 +172,54 @@ def intersection(fa1: EpsilonNFA, fa2: EpsilonNFA) -> EpsilonNFA:
             fa3.add_transition(states3[from_idx[i]], symb, states3[to_idx[i]])
 
     return fa3
+
+
+def union(first_fa: EpsilonNFA, second_fa: EpsilonNFA) -> EpsilonNFA:
+    """
+    Union of two EpsilonNFA.
+    """
+    fa = EpsilonNFA()
+
+    for from_, symb, to in first_fa:
+        fa.add_transition(from_.value, symb, to.value)
+
+    for from_, symb, to in second_fa:
+        fa.add_transition(from_.value, symb, to.value)
+
+    for s1 in first_fa.start_states:
+        fa.add_start_state((1, s1.value))
+
+    for s2 in second_fa.start_states:
+        fa.add_start_state((2, s2.value))
+
+    for s1 in first_fa.final_states:
+        fa.add_final_state((1, s1.value))
+
+    for s2 in second_fa.final_states:
+        fa.add_final_state((2, s2.value))
+
+    return fa
+
+
+def concatenation(first_fa: EpsilonNFA, second_fa: EpsilonNFA) -> EpsilonNFA:
+    """
+    Concatenation of two EpsilonNFA.
+    """
+    fa = EpsilonNFA()
+
+    for from_, symb, to in first_fa:
+        fa.add_transition(from_.value, symb, to.value)
+
+    for from_, symb, to in second_fa:
+        fa.add_transition(from_.value, symb, to.value)
+
+    for st1 in first_fa.start_states:
+        fa.add_start_state(st1.value)
+
+        for s2 in second_fa.final_states:
+            fa.add_transition(st1.value, Epsilon(), s2.value)
+
+    for st2 in second_fa.final_states:
+        fa.add_final_state(st2.value)
+
+    return fa

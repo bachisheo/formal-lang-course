@@ -1,153 +1,176 @@
+from project.Lagraph.Exceptions import InterpretingError
 from project.Lagraph.Semantic import *
 from project.Lagraph.Types import *
 from project.antlr_out.Lagraph.LagraphParser import LagraphParser
-from ..antlr_out.Lagraph.LagraphParser import LagraphParser
-from ..antlr_out.Lagraph.LagraphVisitor import LagraphVisitor
+from project.antlr_out.Lagraph.LagraphVisitor import LagraphVisitor
+from antlr4.Token import CommonToken
 
 
 class StackMemory:
+    """
+    Object for storing and getting program variables
+    """
+
     def __init__(self):
         self.stack = []
         self.cur_mem = {}
 
-    def start_func(self):
-        self.stack.append(self.cur_mem)
-        self.cur_mem = {}
-
-    def return_from(self):
-        self.cur_mem = self.stack.pop()
-
-    def add_var(self, name: str, value):
+    def set_var(self, name: str, value):
         self.cur_mem[name] = value
+        return None
 
-    def get_val_by_name(self, name: str):
-        x = self.cur_mem[name]
-        if x is None:
-            return "ЧИНИ ПОИСК ЗНАЧЕНИЙ РЕКУРСИВНО (:"
-        return x
+    def get_val(self, name) -> LagraphType:
+        if not name in self.cur_mem:
+            raise InterpretingError(f'Uninitialized variable "{name}" used')
+        return self.cur_mem[name]
 
 
 class InterpretingVisitor(LagraphVisitor):
     """This class defines a visitor for a parse tree produced by LagraphParser."""
 
-    def print(self, msg: str):
-        print(str(msg))
+    def __init__(self):
+        self.__log = ""
+
+    def get_log(self) -> str:
+        return self.__log
+
+    def print(self, msg):
+        print(msg)
+        if len(self.__log) == 0:
+            self.__log = str(msg)
+        else:
+            self.__log += "\n" + str(msg)
 
     # Visit a parse tree produced by LagraphParser#prog.
     def visitProg(self, ctx: LagraphParser.ProgContext):
         self.mem = StackMemory()
-
-    # Visit a parse tree produced by LagraphParser#st_bind.
-    def visitSt_bind(self, ctx: LagraphParser.St_bindContext):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by LagraphParser#st_print.
-    def visitSt_print(self, ctx: LagraphParser.St_printContext):
-        return self.visitChildren(ctx)
+    def getString(self, token):
+        if isinstance(token, CommonToken):
+            return token.text
+        return token.value.text
+
+    def acceptBy(self, obj):
+        if hasattr(obj, "accept"):
+            return obj.accept(self)
 
     # Visit a parse tree produced by LagraphParser#bind.
     def visitBind(self, ctx: LagraphParser.BindContext):
-        var_name = (ctx.name).accept(self)
-        val = (ctx.value).accept(self)
-        self.mem.add_var(var_name, val)
+        var_name = self.getString(ctx.name)
+        val = self.acceptBy(ctx.value)
+        self.mem.set_var(var_name, val)
+        return None
 
     # Visit a parse tree produced by LagraphParser#print.
     def visitPrint(self, ctx: LagraphParser.PrintContext):
-        expr = (ctx.exp).accept(self)
+        expr = self.acceptBy(ctx.exp)
         self.print(expr)
         return None
 
     # Visit a parse tree produced by LagraphParser#lambda.
     def visitLambda(self, ctx: LagraphParser.LambdaContext):
-        var = (ctx.var()).accept(self)
-        expr = (ctx.expr()).accept(self)
-        return Lambda(var, expr)
-
-    # Visit a parse tree produced by LagraphParser#var_list.
-    def visitVar_list(self, ctx: LagraphParser.Var_listContext):
-        return self.visitChildren(ctx)
+        var = self.getString(ctx.var())
+        expr = ctx.expr()
+        return LambdaType(var, expr)
 
     # Visit a parse tree produced by LagraphParser#var.
     def visitVar(self, ctx: LagraphParser.VarContext):
-        var_name = (ctx.value).accept(self)
-        return self.mem.get_val_by_name(var_name)
+        var_name = self.acceptBy(ctx.value)
+        return self.mem.get_val(var_name)
 
     # Visit a parse tree produced by LagraphParser#int_literal.
     def visitInt_literal(self, ctx: LagraphParser.Int_literalContext):
-        val = (ctx.value).accept(self)
-        # ctx.value.text
-        return Int(val)
+        val = self.getString(ctx.value)
+        return int(val)
 
     # Visit a parse tree produced by LagraphParser#string_literal.
     def visitString_literal(self, ctx: LagraphParser.String_literalContext):
-        val = ctx.value.text
-        return String(val)
-
-    # Visit a parse tree produced by LagraphParser#set_literal.
-    def visitSet_literal(self, ctx: LagraphParser.Set_literalContext):
-        return self.visitChildren(ctx)
+        val = self.getString(ctx.value)
+        return val[1:-1]
 
     # Visit a parse tree produced by LagraphParser#set.
     def visitSet(self, ctx: LagraphParser.SetContext):
-        return self.visitChildren(ctx)
+        vals = set()
+        vals.add(self.acceptBy(ctx.v1))
+        for v in ctx.vs:
+            vals.add(self.acceptBy(v))
+        return vals
+
+    # Visit a parse tree produced by LagraphParser#tuple.
+    def visitTuple(self, ctx: LagraphParser.TupleContext):
+        lst = [self.acceptBy(ctx.v1)]
+        for v in ctx.vs:
+            lst.append(self.acceptBy(v))
+        return tuple(lst)
 
     # Visit a parse tree produced by LagraphParser#expr_val.
     def visitExpr_val(self, ctx: LagraphParser.Expr_valContext):
-        return self.visitChildren(ctx)
+        expr = self.acceptBy(ctx.e)
+        return expr
 
     # Visit a parse tree produced by LagraphParser#expr_star.
     def visitExpr_star(self, ctx: LagraphParser.Expr_starContext):
-        return self.visitChildren(ctx)
+        expr = self.acceptBy(ctx.e)
+        return
 
     # Visit a parse tree produced by LagraphParser#expr_filter.
     def visitExpr_filter(self, ctx: LagraphParser.Expr_filterContext):
-        return self.visitChildren(ctx)
+        lambda_ = self.acceptBy(ctx.l)
+        graph = self.acceptBy(ctx.e)
+        return filter_expression(self, lambda_, graph)
 
     # Visit a parse tree produced by LagraphParser#expr_binop.
     def visitExpr_binop(self, ctx: LagraphParser.Expr_binopContext):
-        operator = ctx.op.accept(self)
-        expr1 = (ctx.e1).accept(self)
-        expr2 = (ctx.e2).accept(self)
+        operator = self.acceptBy(ctx.op)
+        expr1 = self.acceptBy(ctx.e1)
+        expr2 = self.acceptBy(ctx.e2)
         return binary_operation(expr1, expr2, operator)
 
     # Visit a parse tree produced by LagraphParser#expr_map.
     def visitExpr_map(self, ctx: LagraphParser.Expr_mapContext):
-        lambd = (ctx.l).accept(self)
-        graph = (ctx.e).accept(self)
-        return map_expression(lambd, graph)
+        lambda_ = self.acceptBy(ctx.l)
+        graph = self.acceptBy(ctx.e)
+        return map_expression(self, lambda_, graph)
 
-    # Visit a parse tree produced by LagraphParser#expr_brace.
-    def visitExpr_brace(self, ctx: LagraphParser.Expr_braceContext):
-        return self.visitChildren(ctx)
-
-    # Visit a parse tree produced by LagraphParser#expr_one_step.
-    def visitExpr_one_step(self, ctx: LagraphParser.Expr_one_stepContext):
-        return self.visitChildren(ctx)
+    # Visit a parse tree produced by LagraphParser#expr_from_regex.
+    def visitExpr_from_regex(self, ctx: LagraphParser.Expr_from_regexContext):
+        source = self.acceptBy(ctx.e)
+        return load_graph("regex", source)
 
     # Visit a parse tree produced by LagraphParser#expr_in_set.
     def visitExpr_in_set(self, ctx: LagraphParser.Expr_in_setContext):
-        return self.visitChildren(ctx)
+        elem = self.acceptBy(ctx.e)
+        set_ = self.acceptBy(ctx.s)
+        return is_in_set(elem, set_)
 
     # Visit a parse tree produced by LagraphParser#expr_get.
     def visitExpr_get(self, ctx: LagraphParser.Expr_getContext):
-        operator = ctx.op.accept(self)
-        graph = (ctx.g).accept(self)
+        operator = self.acceptBy(ctx.op)
+        graph = self.acceptBy(ctx.graph)
         return get_expression(graph, operator)
 
     # Visit a parse tree produced by LagraphParser#expr_var.
     def visitExpr_var(self, ctx: LagraphParser.Expr_varContext):
-        return self.visitChildren(ctx)
+        if isinstance(ctx.e, LagraphParser.VarContext):
+            if isinstance(ctx.e.value, CommonToken):
+                name = self.getString(ctx.e.value)
+                return self.mem.get_val(name)
+        expr = self.acceptBy(ctx.e)
+        return expr
 
     # Visit a parse tree produced by LagraphParser#expr_set.
     def visitExpr_set(self, ctx: LagraphParser.Expr_setContext):
-        operator = ctx.op.accept(self)
-        verts = (ctx.v).accept(self)
-        graph = (ctx.g).accept(self)
-        return set_expression(verts, graph, operator)
+        operator = self.acceptBy(ctx.op)
+        vertices = self.acceptBy(ctx.values)
+        graph = self.acceptBy(ctx.graph)
+        return set_expression(vertices, graph, operator)
 
     # Visit a parse tree produced by LagraphParser#expr_load.
     def visitExpr_load(self, ctx: LagraphParser.Expr_loadContext):
-        return self.visitChildren(ctx)
+        way = self.getString(ctx.way)
+        source = self.getString(ctx.source)[1:-1]
+        return load_graph(way, source)
 
     # Visit a parse tree produced by LagraphParser#set_operator.
     def visitSet_operator(self, ctx: LagraphParser.Set_operatorContext):

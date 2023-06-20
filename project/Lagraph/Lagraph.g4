@@ -4,40 +4,53 @@ fragment DIGIT: [0-9];
 
 prog: (s+=statement)* EOF;
 
-statement: bind   #st_bind
-          | print #st_print
+statement: bind
+          | print
           ;
 
-bind: 'let' name=var '=' value=expr;
-print: 'print' exp=expr;
-
-lambda: '\\' var '->' expr ;
-var_list: v1=var (',' v+=var_list)* | '(' v+=var_list ')' (',' v+=var_list)* ;
-
-var: value=IDENT
+bind:
+  'let' name=var '=' value=expr
   ;
-val: value=INT    #int_literal
-  | value=STRING  #string_literal
-  | value=set     #set_literal
+
+print:
+  'print' exp=expr
+  ;
+
+lambda:
+  '\\' var '->' expr
+  ;
+
+tuple:
+  '(' v1=expr (',' vs+=expr)+ ')'
+  ;
+
+var:
+  value=IDENT
+  ;
+
+val:
+  value=INT         #int_literal
+  | value=STRING    #string_literal
+  | value=set       #set_literal
+  | value=tuple     #tuple_literal
   ;
 
 set:
-	'{' INT '}'
-	|'{' INT '..' INT '}'
+  '{' v1=expr (',' vs+=expr)* '}'
   ;
 
 expr:
-  '(' e=expr ')'                                          #expr_brace
-  | e=var                                                 #expr_var
-  | e=val                                                 #expr_val
-  | op=set_operator v=expr 'to' g=expr                       #expr_set
-  | op=get_operator g=expr                                   #expr_get
+  '(' e=expr ')'                                              #expr_brace
+  | e=var                                                     #expr_var
+  | e=val                                                     #expr_val
+  | op=set_operator values=expr 'to' graph=expr                       #expr_set
+  | op=get_operator graph=expr                                   #expr_get
   | e1=expr op=binary_operator e2=expr                       #expr_binop
   | op='map' '(' l=lambda ')' 'on' e=expr                               #expr_map
   | op='filter' '(' l=lambda ')' 'on' e=expr                            #expr_filter
-  | 'load' ('path' path=STRING | 'graph' gname=STRING)    #expr_load
+  | 'loadFrom' (way='path' source=STRING | way='name' source=STRING)    #expr_load
   | e1=expr '*'                                           #expr_star
-  | 'oneStep' e=expr                                      #expr_one_step
+  | 'fromRegex' e=expr                                      #expr_from_regex
   | e=expr 'in' s=expr                                  #expr_in_set
 ;
 
@@ -61,6 +74,7 @@ binary_operator:
   '&&'
   | '++'
   | '||'
+  | '=='
   ;
 
 
