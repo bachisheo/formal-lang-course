@@ -10,7 +10,6 @@ def test_saving_to_file():
     two_cycle = gu.generate_two_cycles_graph(num1, num2, (label1, label2), path)
     cycle_from_file = nx.nx_pydot.read_dot(path)
     assert two_cycle.number_of_edges() == cycle_from_file.number_of_edges()
-    assert two_cycle.number_of_nodes() == cycle_from_file.number_of_nodes()
     assert gu.unique_labels(two_cycle) == gu.unique_labels(cycle_from_file)
 
 

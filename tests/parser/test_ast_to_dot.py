@@ -57,17 +57,22 @@ def test_print():
 
 
 def test_expr_set_stmt():
+    prog = Node("program", 1)
     prnt = Node("print", 2)
     set_start = Node("setStart", 3)
+    set_ = Node("set", 4)
+    a = Node("a", 5)
+    graph = Node("graph_x", 6)
     gr = MultiDiGraph(
         [
-            ("program", prnt, 0),
-            (prnt, set_start),
-            (set_start, "a", 0),
-            (set_start, "graph_x", 1),
+            (prog, prnt, 0),
+            (prnt, set_start, 0),
+            (set_start, set_, 0),
+            (set_, a, 0),
+            (set_start, graph, 1),
         ]
     )
-    ast = to_graph(parse_from("print setStart a to graph_x"))
+    ast = to_graph(parse_from("print setStart {a} to graph_x"))
     assert is_eq(gr, ast)
 
 

@@ -83,9 +83,9 @@ class GraphVisitor(LagraphVisitor):
         operator = ctx.op.accept(self)
         node = Node(operator, self.next_id())
         self.graph.add_node(node)
-        verts = (ctx.v).accept(self)
+        verts = (ctx.values).accept(self)
         self.graph.add_edge(node, verts, 0)
-        graph = (ctx.g).accept(self)
+        graph = (ctx.graph).accept(self)
         self.graph.add_edge(node, graph, 1)
         return node
 
@@ -102,7 +102,7 @@ class GraphVisitor(LagraphVisitor):
         operator = ctx.op.accept(self)
         node = Node(operator, self.next_id())
         self.graph.add_node(node)
-        graph = (ctx.g).accept(self)
+        graph = (ctx.graph).accept(self)
         self.graph.add_edge(node, graph)
         return node
 
@@ -131,4 +131,32 @@ class GraphVisitor(LagraphVisitor):
         self.graph.add_edge(node, vars, "variable")
         expr = (ctx.expr()).accept(self)
         self.graph.add_edge(node, expr, "expr")
+        return node
+
+    # Visit a parse tree produced by LagraphParser#set.
+    def visitSet(self, ctx: LagraphParser.SetContext):
+        node = Node("set", self.next_id())
+        self.graph.add_node(node)
+
+        v1 = (ctx.v1).accept(self)
+        self.graph.add_edge(node, v1, 0)
+
+        for i in range(1, len(ctx.vs)):
+            v = ctx.vs[i].accept(self)
+            self.graph.add_edge(node, v, i)
+
+        return node
+
+    # Visit a parse tree produced by LagraphParser#tuple.
+    def visitTuple(self, ctx: LagraphParser.TupleContext):
+        node = Node("tuple", self.next_id())
+        self.graph.add_node(node)
+
+        v1 = (ctx.v1).accept(self)
+        self.graph.add_edge(node, v1, 0)
+
+        for i in range(1, len(ctx.vs)):
+            v = ctx.vs[i].accept(self)
+            self.graph.add_edge(node, v, i)
+
         return node
