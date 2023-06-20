@@ -144,3 +144,17 @@ _minted-presentation/
 *.fdb_latexmk
 *.fls
 *.gz
+project/antlr_out/Lagraph/LagraphListener.py
+project/antlr_out/Lagraph/Lagraph.interp
+project/antlr_out/Lagraph/Lagraph.tokens
+project/antlr_out/Lagraph/LagraphLexer.interp
+project/antlr_out/Lagraph/LagraphLexer.py
+project/antlr_out/Lagraph/LagraphLexer.tokens
+project/antlr_out/Lagraph/LagraphParser.py
+project/antlr_out/Lagraph/LagraphVisitor.py
+project/Lagraph/.antlr/Lagraph.interp
+project/Lagraph/.antlr/Lagraph.tokens
+project/Lagraph/.antlr/LagraphLexer.interp
+project/Lagraph/.antlr/LagraphLexer.java
+project/Lagraph/.antlr/LagraphLexer.tokens
+project/Lagraph/.antlr/LagraphParser.java

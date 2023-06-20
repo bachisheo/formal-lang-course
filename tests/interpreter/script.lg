@@ -1,0 +1,11 @@
+let x = loadFrom path "x.dot"
+let x = setStart {"s1"} to x
+let x = setFinal {"s3"} to x
+print "graph x: "
+print x
+print "start of x: "
+print startOf x
+let s = {"a", "b", "c"}
+let yes =  "a" in s
+print "yes: "
+print yes

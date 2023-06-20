@@ -5,7 +5,7 @@ from networkx import MultiDiGraph
 
 
 def all_pair_rpq_from_graph(
-    bd_graph: MultiDiGraph, query: fa.Regex, start_states=None, final_states=None
+    bd_graph: MultiDiGraph, query: fa.PythonRegex, start_states=None, final_states=None
 ):
     """Executes a regular query to `bd`. The transitive closure of the intersection of the logical representation
       `bd` and `query` is used.
@@ -14,7 +14,7 @@ def all_pair_rpq_from_graph(
     ----------
     bd: `networkx.MultiDiGraph`
         A finite automaton with the specified start and final States
-    query: `pyformlang.regular_expression.Regex`
+    query: `pyformlang.regular_expression.PythonRegex`
         Query regular expression
     start_states: iterable
         Numbers of nodes in the graph that will be marked as the initial states of the automaton. By default, all vertices are marked.
@@ -30,7 +30,7 @@ def all_pair_rpq_from_graph(
     return start_final_states_rpq(fa_bd, query)
 
 
-def start_final_states_rpq(bd: EpsilonNFA, query: fa.Regex):
+def start_final_states_rpq(bd: EpsilonNFA, query: fa.PythonRegex):
     """Executes a regular query to `bd`. The transitive closure of the intersection
     of the logical representation `bd` and `query` is used.
 
@@ -38,7 +38,7 @@ def start_final_states_rpq(bd: EpsilonNFA, query: fa.Regex):
     ----------
     bd: `~pyformlang.finite_automaton.EpsilonNFA`
         A finite automaton with the specified start and final States
-    query: `pyformlang.regular_expression.Regex`
+    query: `pyformlang.regular_expression.PythonRegex`
         Query regular expression
 
     Returns

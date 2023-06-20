@@ -9,10 +9,10 @@ import project.tensor as rpq
 @pytest.mark.parametrize(
     "fa1_regex, fa2_regex",
     [
-        (my_fa.Regex("(a b)*"), my_fa.Regex("a b")),
-        (my_fa.Regex("(a b)* | (c d x)"), my_fa.Regex("x")),
-        (my_fa.Regex("(a b)*"), my_fa.Regex("a b a a b")),
-        (my_fa.Regex("(a b)*"), my_fa.Regex("a b a b a b")),
+        (my_fa.PythonRegex("(a b)*"), my_fa.PythonRegex("a b")),
+        (my_fa.PythonRegex("(a b)* | (c d x)"), my_fa.PythonRegex("x")),
+        (my_fa.PythonRegex("(a b)*"), my_fa.PythonRegex("a b a a b")),
+        (my_fa.PythonRegex("(a b)*"), my_fa.PythonRegex("a b a b a b")),
     ],
 )
 def test_intersection(fa1_regex, fa2_regex):
@@ -26,9 +26,9 @@ def test_intersection(fa1_regex, fa2_regex):
 @pytest.mark.parametrize(
     "reg1, reg2, correct_word",
     [
-        (my_fa.Regex("(a b)*"), my_fa.Regex("a b"), "ab"),
-        (my_fa.Regex("(a b)*"), my_fa.Regex("a b a b a b a b"), "abababab"),
-        (my_fa.Regex("((a b) | (c d x))*"), my_fa.Regex("(c d x a b)*"), "cdxabcdxab"),
+        (my_fa.PythonRegex("(ab)*"), my_fa.PythonRegex("ab"), "ab"),
+        (my_fa.PythonRegex("(ab)*"), my_fa.PythonRegex("abababab"), "abababab"),
+        (my_fa.PythonRegex("(ab|cdx)*"), my_fa.PythonRegex("(cdxab)*"), "cdxabcdxab"),
     ],
 )
 def test_intersection_acception(reg1, reg2, correct_word):
@@ -41,9 +41,9 @@ def test_intersection_acception(reg1, reg2, correct_word):
 @pytest.mark.parametrize(
     "q_regex, reachable_node_count",
     [
-        (my_fa.Regex("(a b)*"), 1),
-        (my_fa.Regex("(a b)* | (a c)"), 2),
-        (my_fa.Regex("(a)*"), 0),
+        (my_fa.PythonRegex("(ab)*"), 1),
+        (my_fa.PythonRegex("(ab)* | (ac)"), 2),
+        (my_fa.PythonRegex("(a)*"), 0),
     ],
 )
 def test_rpq_with_one_start_state(q_regex, reachable_node_count):
@@ -66,7 +66,7 @@ def test_empty_fa_rpq():
     for state in states:
         bd.add_start_state(state)
         bd.add_final_state(state)
-    result = rpq.start_final_states_rpq(bd, my_fa.Regex("ab ba |ba ab"))
+    result = rpq.start_final_states_rpq(bd, my_fa.PythonRegex("ab ba |ba ab"))
     assert len(result) == 0
 
 
@@ -76,9 +76,9 @@ def test_full_fa_rpq():
     for state in states:
         bd.add_start_state(state)
         bd.add_final_state(state)
-    bd.add_transition(states[0], "ab", states[1])
-    bd.add_transition(states[1], "ba", states[0])
-    result = rpq.start_final_states_rpq(bd, my_fa.Regex("(ab |ba)*"))
+    bd.add_transition(states[0], "a", states[1])
+    bd.add_transition(states[1], "b", states[0])
+    result = rpq.start_final_states_rpq(bd, my_fa.PythonRegex("(a|b)*"))
     assert len(result) == len(bd.states) ** 2
     for start in bd.start_states:
         for final in bd.final_states:
@@ -88,9 +88,9 @@ def test_full_fa_rpq():
 @pytest.mark.parametrize(
     "q_regex, reachable_node_count",
     [
-        (my_fa.Regex("(a b)*"), 1),
-        (my_fa.Regex("(a b)* | (a c)"), 2),
-        (my_fa.Regex("(a)*"), 0),
+        (my_fa.PythonRegex("(ab)*"), 1),
+        (my_fa.PythonRegex("(ab)* | (ac)"), 2),
+        (my_fa.PythonRegex("(a)*"), 0),
     ],
 )
 def test_rpq_with_one_start_state_graph(q_regex, reachable_node_count):
@@ -106,13 +106,15 @@ def test_rpq_with_one_start_state_graph(q_regex, reachable_node_count):
 def test_empty_intersect_with_graph_rpq():
     bd = MultiDiGraph()
     bd.add_nodes_from([0, 1])
-    result = rpq.all_pair_rpq_from_graph(bd, my_fa.Regex("ab ba |ba ab"), [1], [0])
+    result = rpq.all_pair_rpq_from_graph(
+        bd, my_fa.PythonRegex("ab ba |ba ab"), [1], [0]
+    )
     assert len(result) == 0
 
 
 def test_full_graph_rpq():
-    bd = MultiDiGraph([(0, 1, {"label": "ab"}), (1, 0, {"label": "ba"})])
-    result = rpq.all_pair_rpq_from_graph(bd, my_fa.Regex("(ab |ba)*"))
+    bd = MultiDiGraph([(0, 1, {"label": "a"}), (1, 0, {"label": "b"})])
+    result = rpq.all_pair_rpq_from_graph(bd, my_fa.PythonRegex("(a|b)*"))
     assert len(result) == len(bd.nodes()) ** 2
     for start in bd.nodes():
         for final in bd.nodes():

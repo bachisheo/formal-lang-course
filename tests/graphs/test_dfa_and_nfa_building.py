@@ -1,15 +1,15 @@
 import pytest
 from networkx import MultiDiGraph
-from project import fa_utils as bfa
+from project import fa_utils as bfa  # it's Build FA
 from project import graph_utils as gu
 
 
 @pytest.mark.parametrize(
     "regex_str, accepts_true, accepts_false, edge_num",
-    [("a b c|d", "abc", "abcd", 4), ("a (b | c) k |d", "ack", "abc", 5)],
+    [("abc|d", "abc", "abcd", 4), ("a(b|c)k|d", "ack", "abc", 5)],
 )
 def test_dfa_from_regex_building(regex_str, accepts_true, accepts_false, edge_num):
-    regex = bfa.Regex(regex_str)
+    regex = bfa.PythonRegex(regex_str)
     dfa = bfa.build_minimal_dfa_from_regex(regex)
     assert dfa.is_deterministic()
     assert dfa.get_number_transitions() == edge_num
